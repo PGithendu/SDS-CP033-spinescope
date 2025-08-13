@@ -76,20 +76,26 @@ for col in df.columns[:-1]:
     input_data.append(val)
 
 if st.button("Predict Condition"):
-    # Load scaler and model (assumes you have saved them as 'scaler.pkl' and 'best_model.h5')
-    try:
-        import joblib
-    except ImportError:
-        st.error("joblib is not installed. Prediction is unavailable.")
-        joblib = None
+    # Load scaler and model (assumes you have saved them as 'scaler.npz' and 'best_model.h5')
     import tensorflow as tf
-    if joblib is not None:
-        scaler = joblib.load("scaler.pkl")
+    import numpy as np
+
+    # Use numpy to load scaler parameters (mean and scale) from a .npz file
+    try:
+        scaler_params = np.load("scaler.npz")
+        scaler_mean = scaler_params["mean"]
+        scaler_scale = scaler_params["scale"]
+    except Exception as e:
+        st.error("Scaler file 'scaler.npz' not found or invalid. Prediction unavailable.")
+        scaler_mean = scaler_scale = None
+
+    if scaler_mean is not None and scaler_scale is not None:
         model = tf.keras.models.load_model("best_model.h5")
         # Preprocess input
         arr = np.array(input_data).reshape(1, -1)
         arr[:, 5] = np.log1p(arr[:, 5])  # log1p transform for degree_spondylolisthesis
-        arr_scaled = scaler.transform(arr)
+        # Manual standardization
+        arr_scaled = (arr - scaler_mean) / scaler_scale
         pred = model.predict(arr_scaled)
         pred_class = np.argmax(pred, axis=1)[0]
         class_map = {0: "Hernia", 1: "Normal", 2: "Spondylolisthesis"}
