@@ -99,17 +99,3 @@ if st.button("Predict Condition"):
 
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
-import tensorflow as tf
-    scaler = joblib.load("scaler.pkl")
-    model = tf.keras.models.load_model("best_model.h5")
-    # Preprocess input
-    arr = np.array(input_data).reshape(1, -1)
-    arr[:, 5] = np.log1p(arr[:, 5])  # log1p transform for degree_spondylolisthesis
-    arr_scaled = scaler.transform(arr)
-    pred = model.predict(arr_scaled)
-    pred_class = np.argmax(pred, axis=1)[0]
-    class_map = {0: "Hernia", 1: "Normal", 2: "Spondylolisthesis"}
-    st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
-
-st.markdown("---")
-st.markdown("Made with Streamlit for SpineScope EDA.")
