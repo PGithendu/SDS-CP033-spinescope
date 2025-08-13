@@ -109,7 +109,3 @@ if st.button("Predict Condition"):
 
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
-        st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
-
-st.markdown("---")
-st.markdown("Made with Streamlit for SpineScope EDA.")
