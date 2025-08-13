@@ -208,33 +208,113 @@ Summary:
 Just like predicting only class 2, this shows poor generalization and class imbalance, but now the model is biased toward "Normal" instead of "Spondylolisthesis".
 
 
-### 📆 Week 3: Model Tuning
+### 📆 Week 4 :Model Selection & Hyperparameter Tuning
 
-### 🔑 Question 1:
+### 🔑 Question 1: What strategies did you use to select your final neural network architecture, and how did you compare different model variants?
 
-### 🔑 Question 2:
+To select the final neural network architecture, I used the following strategies:
 
-### 🔑 Question 3:
+- **Baseline Model:** Started with a simple architecture (1-2 hidden layers, small number of units) to establish a baseline for accuracy and loss.
+- **Incremental Complexity:** Gradually increased the number of hidden layers and units, monitoring validation accuracy and loss to avoid overfitting.
+- **Activation Functions:** Used ReLU for hidden layers and softmax for the output layer (multiclass classification).
+- **Regularization:** Added dropout layers to reduce overfitting and improve generalization.
+- **Batch Size & Epochs:** Experimented with different batch sizes and epochs, using early stopping to prevent unnecessary training.
+- **Hyperparameter Tuning:** Used grid search and cross-validation to systematically test combinations of units, dropout rates, optimizers, and batch sizes.
+- **Performance Metrics:** Compared model variants using validation accuracy, confusion matrix, and classification report (precision, recall, F1-score).
+- **Class Imbalance Handling:** Monitored class-wise performance and, if needed, used class weights or resampling to address imbalance.
+- **Experiment Tracking:** Used MLflow to log model configurations, metrics, and artifacts for reproducibility and easy comparison.
 
-### 🔑 Question 4:
+**Comparison Approach:**  
+Each model variant was evaluated on the same validation set using the above metrics. I selected the architecture that achieved the best balance between high validation accuracy and generalization (low gap between training and validation loss), and that performed reasonably well across all classes (not just the majority class).
+### Which hyperparameters did you tune for your neural network, and what search methods did you use to find optimal values?
 
-### 🔑 Question 5:
+I tuned the following hyperparameters for the neural network:
 
----
+- **Number of hidden layers:** Tested architectures with 1 to 4 hidden layers.
+- **Number of units per layer:** Tried different values (e.g., 8, 16, 32, 64).
+- **Dropout rate:** Evaluated models with and without dropout (0.0 to 0.3).
+- **Batch size:** Used values such as 16 and 32.
+- **Number of epochs:** Used early stopping to determine optimal training duration.
+- **Activation functions:** Used ReLU for hidden layers and softmax for the output layer.
+- **Optimizer:** Used Adam as the main optimizer.
 
-## ✅ Phase 3: Model Deployment
+**Search Methods:**
+- I used a manual grid search approach, systematically testing combinations of the above hyperparameters.
+- For each combination, I trained the model and evaluated it on a validation set using accuracy and macro F1-score.
+- Early stopping was used to avoid overfitting and reduce unnecessary training.
+- The best model was selected based on the highest macro F1-score on the validation set, ensuring balanced performance across all classes.
 
-> Document your approach to building and deploying the Streamlit app, including design decisions, deployment steps, and challenges.
+**Best Model:**  
+The best neural network model was a simple architecture with **1 hidden layer, 8 units, and no dropout** (`{'num_layers': 1, 'units': 8, 'dropout': 0.0}`).  
+This model achieved the highest macro F1-score and validation accuracy among all tested variants, indicating the best balance between generalization and class-wise performance for this dataset.
 
-### 🔑 Question 1:
+### How did hyperparameter tuning affect your model’s performance and generalization?
 
-### 🔑 Question 2:
+Hyperparameter tuning had a significant impact on both the performance and generalization of my neural network:
 
-### 🔑 Question 3:
+- **Before tuning:**  
+  - The initial model (with arbitrary architecture and default parameters) showed signs of overfitting, with high training accuracy but much lower validation accuracy.
+  - The model often predicted only the majority class, resulting in poor macro F1-score and low recall/precision for minority classes.
+  - Validation loss curves were flat or increased after a few epochs, indicating poor generalization.
 
-### 🔑 Question 4:
+- **After tuning:**  
+  - Systematic tuning of the number of layers, units, dropout, and batch size led to a simpler model (1 hidden layer, 8 units, no dropout) that performed better on the validation set.
+  - The best model achieved higher validation accuracy and a better macro F1-score, indicating improved balance across all classes.
+  - Early stopping helped prevent overfitting by halting training when validation loss stopped improving.
+  - Training and validation loss curves became more aligned, with a smaller gap, showing improved generalization.
+  - The tuned model was also faster to train due to its simplicity.
 
-### 🔑 Question 5:
+**Trade-offs:**  
+- More complex models (more layers/units) increased training time and tended to overfit, without improving validation metrics.
+- Simpler models generalized better and were less prone to overfitting, even if their raw training accuracy was slightly lower.
+- Hyperparameter tuning helped find the optimal balance between model complexity and generalization, resulting in a model that performed reasonably well on all classes, not just the majority.
+
+### What validation strategies did you use to ensure robust model selection?
+
+To ensure robust model selection, I used the following validation strategies:
+
+- **Train/Validation Split:**  
+  I split the training data into a training and validation set (typically 80/20) to evaluate model performance on unseen data during hyperparameter tuning.
+
+- **Early Stopping:**  
+  Early stopping was applied based on validation loss to prevent overfitting and select the best epoch for each model.
+
+- **Macro F1-Score:**  
+  I used macro F1-score on the validation set as the main selection metric to ensure balanced performance across all classes, not just the majority.
+
+- **Consistent Validation Set:**  
+  All model variants were evaluated on the same validation set to ensure fair comparison.
+
+- **Cross-Validation for Classical Models:**  
+  For non-neural models (Random Forest, SVM, Logistic Regression), I used k-fold cross-validation to assess stability and generalization.
+
+These strategies helped ensure that the selected model generalized well and was not simply overfitting to the training data.
+
+### What challenges did you encounter during model selection or hyperparameter tuning, and how did you address them?
+
+Several challenges arose during model selection and hyperparameter tuning:
+
+- **Class Imbalance:**  
+  The dataset was imbalanced, with fewer samples for the Hernia class. This caused the model to favor the majority class and resulted in poor recall for minority classes.  
+  *Solution:* Used macro F1-score for model selection to ensure balanced performance, and monitored class-wise metrics closely.
+
+- **Overfitting:**  
+  More complex models (many layers/units) quickly overfit the training data, with validation loss increasing after a few epochs.  
+  *Solution:* Applied early stopping, reduced model complexity, and used dropout where appropriate.
+
+- **Limited Data:**  
+  The relatively small dataset made it difficult to train deep models without overfitting.  
+  *Solution:* Preferred simpler architectures and used validation splits to maximize the use of available data.
+
+- **Hyperparameter Search Space:**  
+  Testing all combinations of hyperparameters was time-consuming.  
+  *Solution:* Used a manual grid search with a limited set of reasonable values for each parameter, focusing on the most impactful ones (layers, units, dropout).
+
+- **Computational Resources:**  
+  Training multiple models increased computational time.  
+  *Solution:* Limited the number of epochs with early stopping and prioritized simpler models that trained faster.
+
+By addressing these challenges, I was able to select a model that generalized better and provided more reliable predictions across all classes.
 
 ---
 
