@@ -1,9 +1,7 @@
-# Streamlit EDA App for SpineScope Dataset
-
 import streamlit as st
 import pandas as pd
 import numpy as np
-
+import altair as alt
 
 st.set_page_config(page_title="SpineScope EDA", layout="wide")
 
@@ -13,7 +11,6 @@ st.markdown("Explore the biomechanical dataset and key insights interactively.")
 # --- Data Loading ---
 @st.cache_data
 def load_data():
-    # Use the correct relative path based on your repo structure
     df = pd.read_csv("submissions/team-members/patrick-githendu/column_3C_weka.csv")
     return df
 
@@ -22,7 +19,6 @@ df = load_data()
 # --- Data Overview ---
 st.header("Data Overview")
 st.write(df.head())
-
 st.write("Shape:", df.shape)
 st.write("Columns:", list(df.columns))
 
@@ -39,8 +35,6 @@ st.line_chart(df[selected_feature])
 # --- Boxplots by Class ---
 st.header("Boxplots by Class")
 selected_box = st.selectbox("Select feature for boxplot", feature_cols, key="box")
-# Use Streamlit's built-in altair chart for boxplot-like visualization
-import altair as alt
 box_data = df[[selected_box, 'class']]
 box_chart = alt.Chart(box_data).mark_boxplot(extent='min-max').encode(
     x=alt.X('class:N', title='Class'),
@@ -71,43 +65,31 @@ st.download_button("Download CSV", df.to_csv(index=False), "spinescope_data.csv"
 st.header("Predict Spinal Condition")
 st.markdown("Enter biomechanical measurements to predict the spinal condition using the trained neural network model.")
 
-# Input fields for all features
 input_data = []
 for col in df.columns[:-1]:
     val = st.number_input(f"{col}", float(df[col].min()), float(df[col].max()), float(df[col].mean()))
     input_data.append(val)
 
 if st.button("Predict Condition"):
-    # --- TensorFlow and scaler.npz check ---
     try:
         import tensorflow as tf
+        scaler_params = np.load("submissions/team-members/patrick-githendu/scaler.npz")
+        scaler_mean = scaler_params["mean"]
+        scaler_scale = scaler_params["scale"]
+        model = tf.keras.models.load_model("submissions/team-members/patrick-githendu/best_model.h5")
+        arr = np.array(input_data).reshape(1, -1)
+        arr[:, 5] = np.log1p(arr[:, 5])  # log1p transform for degree_spondylolisthesis
+        arr_scaled = (arr - scaler_mean) / scaler_scale
+        pred = model.predict(arr_scaled)
+        pred_class = np.argmax(pred, axis=1)[0]
+        class_map = {0: "Hernia", 1: "Normal", 2: "Spondylolisthesis"}
+        st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
     except ImportError:
-        st.warning("TensorFlow is not installed in this environment. Model prediction is unavailable. Please install TensorFlow to enable prediction functionality.")
-        tf = None
-
-    if tf is not None:
-        try:
-            scaler_params = np.load("scaler.npz")
-            scaler_mean = scaler_params["mean"]
-            scaler_scale = scaler_params["scale"]
-        except Exception:
-            st.warning("Scaler file 'scaler.npz' not found or invalid. Prediction unavailable.")
-            scaler_mean = scaler_scale = None
-
-        if scaler_mean is not None and scaler_scale is not None:
-            try:
-                model = tf.keras.models.load_model("best_model.h5")
-                arr = np.array(input_data).reshape(1, -1)
-                arr[:, 5] = np.log1p(arr[:, 5])  # log1p transform for degree_spondylolisthesis
-                arr_scaled = (arr - scaler_mean) / scaler_scale
-                pred = model.predict(arr_scaled)
-                pred_class = np.argmax(pred, axis=1)[0]
-                class_map = {0: "Hernia", 1: "Normal", 2: "Spondylolisthesis"}
-                st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
-            except Exception as e:
-                st.error(f"Prediction failed: {e}")
-        else:
-            st.warning("Scaler parameters are missing. Please ensure 'scaler.npz' is present and valid.")
+        st.warning("TensorFlow or required dependencies are not installed. Prediction is unavailable.")
+    except FileNotFoundError as e:
+        st.warning(f"Required file not found: {e}")
+    except Exception as e:
+        st.error(f"Prediction failed: {e}")
 
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
