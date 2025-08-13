@@ -61,13 +61,14 @@ try:
     st.dataframe(skewness.rename("Skewness"))
 except ImportError:
     st.warning("scipy is not installed. Skewness statistics are unavailable.")
+except Exception:
+    st.warning("Could not compute skewness due to a scipy error.")
 
 # --- Download Data ---
 st.download_button("Download CSV", df.to_csv(index=False), "spinescope_data.csv")
 
 # --- Prediction Section ---
 st.header("Predict Spinal Condition")
-
 st.markdown("Enter biomechanical measurements to predict the spinal condition using the trained neural network model.")
 
 # Input fields for all features
@@ -77,9 +78,38 @@ for col in df.columns[:-1]:
     input_data.append(val)
 
 if st.button("Predict Condition"):
-    st.warning("TensorFlow is not installed in this environment. Model prediction is unavailable. Please install TensorFlow to enable prediction functionality.")
+    # --- TensorFlow and scaler.npz check ---
+    try:
+        import tensorflow as tf
+    except ImportError:
+        st.warning("TensorFlow is not installed in this environment. Model prediction is unavailable. Please install TensorFlow to enable prediction functionality.")
+        tf = None
+
+    if tf is not None:
+        try:
+            scaler_params = np.load("scaler.npz")
+            scaler_mean = scaler_params["mean"]
+            scaler_scale = scaler_params["scale"]
+        except Exception:
+            st.warning("Scaler file 'scaler.npz' not found or invalid. Prediction unavailable.")
+            scaler_mean = scaler_scale = None
+
+        if scaler_mean is not None and scaler_scale is not None:
+            try:
+                model = tf.keras.models.load_model("best_model.h5")
+                arr = np.array(input_data).reshape(1, -1)
+                arr[:, 5] = np.log1p(arr[:, 5])  # log1p transform for degree_spondylolisthesis
+                arr_scaled = (arr - scaler_mean) / scaler_scale
+                pred = model.predict(arr_scaled)
+                pred_class = np.argmax(pred, axis=1)[0]
+                class_map = {0: "Hernia", 1: "Normal", 2: "Spondylolisthesis"}
+                st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
+            except Exception as e:
+                st.error(f"Prediction failed: {e}")
 
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
+        st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
+
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
