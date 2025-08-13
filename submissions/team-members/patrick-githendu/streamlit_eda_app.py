@@ -99,7 +99,7 @@ if st.button("Predict Condition"):
 
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
-    import tensorflow as tf
+import tensorflow as tf
     scaler = joblib.load("scaler.pkl")
     model = tf.keras.models.load_model("best_model.h5")
     # Preprocess input
