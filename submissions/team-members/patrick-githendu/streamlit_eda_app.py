@@ -2,22 +2,11 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import altair as alt
-import subprocess
-import sys
 
-def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+st.set_page_config(page_title="SpineScope EDA & Prediction", layout="wide")
 
-try:
-    import tensorflow as tf
-except ImportError:
-    install("tensorflow")
-    import tensorflow as tf
-
-st.set_page_config(page_title="SpineScope EDA", layout="wide")
-
-st.title("SpineScope EDA Dashboard")
-st.markdown("Explore the biomechanical dataset and key insights interactively.")
+st.title("SpineScope EDA & Prediction App")
+st.markdown("Explore the dataset and predict spinal condition using a neural network (TensorFlow CPU).")
 
 # --- Data Loading ---
 @st.cache_data
@@ -74,7 +63,7 @@ st.download_button("Download CSV", df.to_csv(index=False), "spinescope_data.csv"
 
 # --- Prediction Section ---
 st.header("Predict Spinal Condition")
-st.markdown("Enter biomechanical measurements to predict the spinal condition using the trained neural network model.")
+st.markdown("Enter biomechanical measurements to predict the spinal condition using the trained neural network model (TensorFlow CPU).")
 
 input_data = []
 for col in df.columns[:-1]:
@@ -84,6 +73,8 @@ for col in df.columns[:-1]:
 if st.button("Predict Condition"):
     try:
         import tensorflow as tf
+        # Force TensorFlow to use CPU only
+        tf.config.set_visible_devices([], 'GPU')
         scaler_params = np.load("submissions/team-members/patrick-githendu/scaler.npz")
         scaler_mean = scaler_params["mean"]
         scaler_scale = scaler_params["scale"]
@@ -103,4 +94,4 @@ if st.button("Predict Condition"):
         st.error(f"Prediction failed: {e}")
 
 st.markdown("---")
-st.markdown("Made with Streamlit for SpineScope EDA.")
+st.markdown("Made with Streamlit for SpineScope EDA & Prediction.")
