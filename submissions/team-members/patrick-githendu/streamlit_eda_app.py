@@ -75,7 +75,7 @@ if st.button("Predict Condition"):
         import tensorflow as tf
         # Force TensorFlow to use CPU only
         tf.config.set_visible_devices([], 'GPU')
-        scaler_params = np.load("scaler.npz")
+        scaler_params = np.load("submissions/team-members/patrick-githendu/scaler.npz")
         scaler_mean = scaler_params["mean"]
         scaler_scale = scaler_params["scale"]
         model = tf.keras.models.load_model("submissions/team-members/patrick-githendu/best_model.h5")
