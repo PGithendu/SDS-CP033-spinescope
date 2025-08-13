@@ -4,6 +4,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+
 st.set_page_config(page_title="SpineScope EDA", layout="wide")
 
 st.title("SpineScope EDA Dashboard")
@@ -76,34 +77,7 @@ for col in df.columns[:-1]:
     input_data.append(val)
 
 if st.button("Predict Condition"):
-    # Load scaler and model (assumes you have saved them as 'scaler.npz' and 'best_model.h5')
-    try:
-        import tensorflow as tf
-    except ImportError:
-        st.error("TensorFlow is not installed. Prediction is unavailable.")
-        tf = None
-
-    if tf is not None:
-        # Use numpy to load scaler parameters (mean and scale) from a .npz file
-        try:
-            scaler_params = np.load("scaler.npz")
-            scaler_mean = scaler_params["mean"]
-            scaler_scale = scaler_params["scale"]
-        except Exception as e:
-            st.error("Scaler file 'scaler.npz' not found or invalid. Prediction unavailable.")
-            scaler_mean = scaler_scale = None
-
-        if scaler_mean is not None and scaler_scale is not None:
-            model = tf.keras.models.load_model("best_model.h5")
-            # Preprocess input
-            arr = np.array(input_data).reshape(1, -1)
-            arr[:, 5] = np.log1p(arr[:, 5])  # log1p transform for degree_spondylolisthesis
-            # Manual standardization
-            arr_scaled = (arr - scaler_mean) / scaler_scale
-            pred = model.predict(arr_scaled)
-            pred_class = np.argmax(pred, axis=1)[0]
-            class_map = {0: "Hernia", 1: "Normal", 2: "Spondylolisthesis"}
-            st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
+    st.warning("TensorFlow is not installed in this environment. Model prediction is unavailable. Please install TensorFlow to enable prediction functionality.")
 
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
