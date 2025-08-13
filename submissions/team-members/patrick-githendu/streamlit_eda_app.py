@@ -4,9 +4,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Remove all subprocess/pip install logic for seaborn
-import seaborn as sns
-
 st.set_page_config(page_title="SpineScope EDA", layout="wide")
 
 st.title("SpineScope EDA Dashboard")
@@ -40,13 +37,14 @@ st.line_chart(df[selected_feature])
 # --- Boxplots by Class ---
 st.header("Boxplots by Class")
 selected_box = st.selectbox("Select feature for boxplot", feature_cols, key="box")
-import io
-fig2 = sns.boxplot(x='class', y=selected_box, data=df).get_figure()
-buf = io.BytesIO()
-fig2.savefig(buf, format="png")
-buf.seek(0)
-st.image(buf, caption=f"Boxplot of {selected_box} by class")
-fig2.clf()
+# Use Streamlit's built-in altair chart for boxplot-like visualization
+import altair as alt
+box_data = df[[selected_box, 'class']]
+box_chart = alt.Chart(box_data).mark_boxplot(extent='min-max').encode(
+    x=alt.X('class:N', title='Class'),
+    y=alt.Y(f'{selected_box}:Q', title=selected_box)
+).properties(width=400, height=300)
+st.altair_chart(box_chart, use_container_width=True)
 
 # --- Correlation Matrix ---
 st.header("Correlation Matrix")
@@ -88,5 +86,7 @@ if st.button("Predict Condition"):
     class_map = {0: "Hernia", 1: "Normal", 2: "Spondylolisthesis"}
     st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
 
+st.markdown("---")
+st.markdown("Made with Streamlit for SpineScope EDA.")
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
