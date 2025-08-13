@@ -4,17 +4,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Remove matplotlib and use seaborn/streamlit native plotting only
-import sys
-import subprocess
-def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-try:
-    import seaborn as sns
-except ImportError:
-    install("seaborn")
-    import seaborn as sns
+# Remove all subprocess/pip install logic for seaborn
+import seaborn as sns
 
 st.set_page_config(page_title="SpineScope EDA", layout="wide")
 
@@ -90,6 +81,15 @@ if st.button("Predict Condition"):
     model = tf.keras.models.load_model("best_model.h5")
     # Preprocess input
     arr = np.array(input_data).reshape(1, -1)
+    arr[:, 5] = np.log1p(arr[:, 5])  # log1p transform for degree_spondylolisthesis
+    arr_scaled = scaler.transform(arr)
+    pred = model.predict(arr_scaled)
+    pred_class = np.argmax(pred, axis=1)[0]
+    class_map = {0: "Hernia", 1: "Normal", 2: "Spondylolisthesis"}
+    st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
+
+st.markdown("---")
+st.markdown("Made with Streamlit for SpineScope EDA.")
     arr[:, 5] = np.log1p(arr[:, 5])  # log1p transform for degree_spondylolisthesis
     arr_scaled = scaler.transform(arr)
     pred = model.predict(arr_scaled)
