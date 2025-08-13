@@ -106,6 +106,8 @@ if st.button("Predict Condition"):
                 st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
             except Exception as e:
                 st.error(f"Prediction failed: {e}")
+        else:
+            st.warning("Scaler parameters are missing. Please ensure 'scaler.npz' is present and valid.")
 
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
