@@ -12,7 +12,8 @@ st.markdown("Explore the biomechanical dataset and key insights interactively.")
 # --- Data Loading ---
 @st.cache_data
 def load_data():
-    df = pd.read_csv("column_3C_weka.csv")
+    # Use the correct relative path based on your repo structure
+    df = pd.read_csv("submissions/team-members/patrick-githendu/column_3C_weka.csv")
     return df
 
 df = load_data()
