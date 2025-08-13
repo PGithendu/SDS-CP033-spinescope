@@ -90,12 +90,3 @@ if st.button("Predict Condition"):
 
 st.markdown("---")
 st.markdown("Made with Streamlit for SpineScope EDA.")
-    arr[:, 5] = np.log1p(arr[:, 5])  # log1p transform for degree_spondylolisthesis
-    arr_scaled = scaler.transform(arr)
-    pred = model.predict(arr_scaled)
-    pred_class = np.argmax(pred, axis=1)[0]
-    class_map = {0: "Hernia", 1: "Normal", 2: "Spondylolisthesis"}
-    st.success(f"Predicted Condition: **{class_map.get(pred_class, 'Unknown')}**")
-
-st.markdown("---")
-st.markdown("Made with Streamlit for SpineScope EDA.")
