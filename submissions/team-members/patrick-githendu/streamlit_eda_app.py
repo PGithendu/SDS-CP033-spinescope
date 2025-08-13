@@ -2,6 +2,17 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import altair as alt
+import subprocess
+import sys
+
+def install(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+try:
+    import tensorflow as tf
+except ImportError:
+    install("tensorflow")
+    import tensorflow as tf
 
 st.set_page_config(page_title="SpineScope EDA", layout="wide")
 
