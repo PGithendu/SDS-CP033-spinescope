@@ -54,9 +54,12 @@ st.dataframe(corr)
 
 # --- Skewness Table ---
 st.header("Feature Skewness")
-import scipy.stats as stats
-skewness = df[feature_cols].apply(stats.skew)
-st.dataframe(skewness.rename("Skewness"))
+try:
+    import scipy.stats as stats
+    skewness = df[feature_cols].apply(stats.skew)
+    st.dataframe(skewness.rename("Skewness"))
+except ImportError:
+    st.warning("scipy is not installed. Skewness statistics are unavailable.")
 
 # --- Download Data ---
 st.download_button("Download CSV", df.to_csv(index=False), "spinescope_data.csv")
