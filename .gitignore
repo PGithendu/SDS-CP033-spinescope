@@ -8,3 +8,9 @@ venv/
 .venv/
 env/
 ENV/
+mlruns/
+submissions/team-members/patrick-githendu/mlruns/
+submissions/team-members/patrick-githendu/.venv/
+submissions/team-members/patrick-githendu/tuner_dir/
+submissions/team-members/patrick-githendu/column_3C_weka.csv
+submissions/team-members/patrick-githendu/column_2C_weka.csv
